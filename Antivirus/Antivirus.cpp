@@ -26,6 +26,7 @@ int main(int argc, char* argv[])
 	// Скрытие консоли, если запущен exe'шник
 	HWND console = GetConsoleWindow();
 	DWORD dwProcessId;
+	
 	GetWindowThreadProcessId(console, &dwProcessId);
 	if (GetCurrentProcessId() == dwProcessId) {
 		ShowWindow(console, SW_HIDE);
@@ -34,8 +35,19 @@ int main(int argc, char* argv[])
 		cout << "Program started from console. Sorry, but it's not supported." << endl;
 		return 0;
 	}
+
+	// Проверка перенесен ли антивирус.
 	Transfer transfer = Transfer(path(argv[0]));
-	transfer.move();
+	if (!transfer.isMoved()) {
+		cout << "join" << endl;
+		transfer.move();
+		return 0;
+	}
+	
+
+	string a;
+	cout << "lol" << endl;
+	cin >> a;
 }
 
 

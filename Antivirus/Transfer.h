@@ -18,68 +18,71 @@ public: Transfer(path path) {
 	this->currentPath = path;
 	this->antivirusPath.append(path.filename().string());
 }
-	  // Returns antivirus path
-public: path getAntivirusPath() {
-	return status == true ? antivirusPath : path();
+public: bool isMoved() {
+	cout << antivirusPath << " " << currentPath << endl;
+	if (antivirusPath.compare(currentPath) == 0) {
+		return status = true;
+	}
+	else {
+		return status = false;
+	}
 }
-
-	  // Moves current file to the antivirus dir
+	  // Перемещает антивирус в целевой путь
 public: bool move() {
-	// Compares program path and target path
+	// Сравнивает путь антивируса и целевой путь
 	if (antivirusPath.compare(currentPath) == 0) {
 		return status = true;
 	}
 
-	// Creating directory if not exists
+	// Создает директорию, в случае её отсутствия
 	createDirectory();
 
-	// Checks if file exists
+	// Проверяет существует ли файл
 	if (fileExists()) {
 		return status = true;
 	}
 
-	// Copy file to the antivirus path
+	// Копирует файл в целевой путь
 	copy(currentPath, antivirusPath);
+	regedit();
 
-	// starts program from antivirus path
+	// Запускает программу из целевого пути
 	startup();
 	return status = true;
 }
 
-	  // return true if directory created or false if not.
-private: bool createDirectory() {
-	return create_directory(antivirusPath.parent_path());
+	  // Создает директорию
+private: void createDirectory() {
+	create_directory(antivirusPath.parent_path());
 }
-	   // is file exists
+	   // Возвращает true, если файл существует
 private: bool fileExists() {
 	struct stat buf;
 	return (stat(antivirusPath.string().c_str(), &buf) == 0);
 }
 
+private: void regedit() {
+	std::wstring progPath = antivirusPath.wstring();
+	HKEY hkey = NULL;
+	LONG createStatus = RegCreateKey(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", &hkey);     
+	LONG status = RegSetValueEx(hkey, L"Antivirus", 0, REG_SZ, (BYTE*)progPath.c_str(), (progPath.size() + 1) * sizeof(wchar_t));
+}
+
 private: VOID startup()
 {
-	// additional information
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
 
-	// set the size of the structures
+	// Установка размера структуры
 	ZeroMemory(&si, sizeof(si));
 	si.cb = sizeof(si);
 	ZeroMemory(&pi, sizeof(pi));
 
-	// start the program up
-	CreateProcess(antivirusPath.wstring().c_str(),   // the path
-		NULL,           // Command line
-		NULL,           // Process handle not inheritable
-		NULL,           // Thread handle not inheritable
-		FALSE,          // Set handle inheritance to FALSE
-		0,              // No creation flags
-		NULL,           // Use parent's environment block
-		NULL,           // Use parent's starting directory 
-		&si,            // Pointer to STARTUPINFO structure
-		&pi             // Pointer to PROCESS_INFORMATION structure (removed extra parentheses)
-	);
-	// Close process and thread handles. 
+	// Запуск программу
+	CreateProcess(antivirusPath.wstring().c_str(),
+		NULL, NULL,	NULL, FALSE, 0,NULL, NULL, &si, &pi);
+	
+	// Закрывает предыдущий процесс и ветки
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
 }
