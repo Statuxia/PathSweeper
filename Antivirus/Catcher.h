@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 #include <iostream>
 #include <filesystem>
 #include <winternl.h>
@@ -10,46 +10,50 @@ using namespace std::filesystem;
 class Catcher {
 
 private:
-	// Пути до AppData, {User} и WindowsServices
+	// РџСѓС‚Рё РґРѕ AppData, {User} Рё WindowsServices
 	path appdata = temp_directory_path()
 		.parent_path()
 		.parent_path()
-		.parent_path();
-	path user = appdata.parent_path();
+		.parent_path(); // C:\\Users\\{User}\\AppData
+	path user = appdata.parent_path(); // C:\\Users\\{User}
 	path windowsServices = appdata.append("Roaming").append("WindowsServices");
 
 	// smss virus path
 	const path smssVirusPath = user.append("smss.exe");
-
 
 	// vbs virus
 	path helperVbsPath = path(windowsServices); //= path(windowsServices.string().append("\\helper.vbs"));
 	path installerVbsPath = path(windowsServices); // = path(windowsServices.string().append("\\installer.vbs"));
 	path movemenoregVbsPath = path(windowsServices); // = path(windowsServices.string().append("\\movemenoreg.vbs"));
 	path WindowsServicesExePath = path(windowsServices); // = path(windowsServices.string().append("\\WindowsServices.exe"));
+	list<path> listOfPaths;
 
 public: Catcher() {
 	helperVbsPath.append("helper.vbs");
 	installerVbsPath.append("installer.vbs");
 	movemenoregVbsPath.append("movemenoreg.vbs");
 	WindowsServicesExePath.append("WindowsServices.exe");
+	
+	listOfPaths = { smssVirusPath, helperVbsPath, installerVbsPath,
+		movemenoregVbsPath, WindowsServicesExePath };
+	// Р”Р»СЏ РґРѕР±Р°РІР»РµРЅРёСЏ РјРѕР¶РЅРѕ РєР°Рє СЃРѕР·РґР°С‚СЊ РїРµСЂРµРјРµРЅРЅСѓСЋ Рё РґРѕР±Р°РІРёС‚СЊ РІ Р»РёСЃС‚ 
+	// РёР»Рё РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РЅР° РјРµСЃС‚Рµ С‡РµСЂРµР· path("РїСѓС‚СЊ\\РґРѕ\\С„Р°Р№Р»Р°.С‚РёРї_С„Р°Р№Р»Р°")
+
 	while (true) {
-		detectProcesses(); // Нахождение и отключение процессов.
-		Sleep(2000); // Сон 2 секунды, чтобы удостовериться, что процессы вырубились.
-		deleteViruses();   // Удаление вирусов.
-		Sleep(10000); // Сон 10 секунд. Программам тоже нужно спать =)
+		detectProcesses(); // РќР°С…РѕР¶РґРµРЅРёРµ Рё РѕС‚РєР»СЋС‡РµРЅРёРµ РїСЂРѕС†РµСЃСЃРѕРІ.
+		Sleep(2000); // РЎРѕРЅ 2 СЃРµРєСѓРЅРґС‹, С‡С‚РѕР±С‹ СѓРґРѕСЃС‚РѕРІРµСЂРёС‚СЊСЃСЏ, С‡С‚Рѕ РїСЂРѕС†РµСЃСЃС‹ РІС‹СЂСѓР±РёР»РёСЃСЊ.
+		deleteViruses();   // РЈРґР°Р»РµРЅРёРµ РІРёСЂСѓСЃРѕРІ.
+		Sleep(10000); // РЎРѕРЅ 10 СЃРµРєСѓРЅРґ. РџСЂРѕРіСЂР°РјРјР°Рј С‚РѕР¶Рµ РЅСѓР¶РЅРѕ СЃРїР°С‚СЊ =)
 	}
 }
-	  // Удаляет вирусные файлы, если они существуют.
+	  // РЈРґР°Р»СЏРµС‚ РІРёСЂСѓСЃРЅС‹Рµ С„Р°Р№Р»С‹, РµСЃР»Рё РѕРЅРё СЃСѓС‰РµСЃС‚РІСѓСЋС‚.
 public: void deleteViruses() {
-	remove(smssVirusPath.string());
-	remove(helperVbsPath.string());
-	remove(installerVbsPath.string());
-	remove(movemenoregVbsPath.string());
-	remove(WindowsServicesExePath.string());
+	for (path path : listOfPaths) {
+		remove(path.string());
+	}
 }
 
-	  // Темная магия от японца. Низкий поклон и сильное нежелание читать, так как оно работает.
+	  // РўРµРјРЅР°СЏ РјР°РіРёСЏ РѕС‚ СЏРїРѕРЅС†Р°. РќРёР·РєРёР№ РїРѕРєР»РѕРЅ Рё СЃРёР»СЊРЅРѕРµ РЅРµР¶РµР»Р°РЅРёРµ С‡РёС‚Р°С‚СЊ, С‚Р°Рє РєР°Рє РѕРЅРѕ СЂР°Р±РѕС‚Р°РµС‚.
 	  // https://espresso3389.hatenablog.com/entry/20080723/1216815501
 public: void detectProcesses() {
 	HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -72,25 +76,21 @@ public: void detectProcesses() {
 			buffer[0] = 0;
 
 			if (GetRemoteCommandLineW(hProcess, buffer, MAX_PATH)) {
-				// Темная магия заканчивается. Просыпаются рукожопии.
-				string path;
+				// РўРµРјРЅР°СЏ РјР°РіРёСЏ Р·Р°РєР°РЅС‡РёРІР°РµС‚СЃСЏ. РџСЂРѕСЃС‹РїР°СЋС‚СЃСЏ СЂСѓРєРѕР¶РѕРїРёРё.
+				string args;
 				for (int i = 0; i < (sizeof(buffer) / sizeof(buffer[0])); i++) {
-					path += buffer[i];
+					args += buffer[i];
 				}
 
-				// Сравнение путей в аргументах процесса с вирусными.
-				size_t smssExists = path.find(smssVirusPath.string());
-				size_t helperVBSExists = path.find(helperVbsPath.string());
-				size_t installerVBSExists = path.find(installerVbsPath.string());
-				size_t movemenoregVBSExists = path.find(movemenoregVbsPath.string());
-				size_t WindowsServicesExeExists = path.find(WindowsServicesExePath.string());
-
-				// Если совпало, вырубаем.
-				if (string::npos != smssExists || string::npos != helperVBSExists || string::npos != installerVBSExists ||
-					string::npos != movemenoregVBSExists || string::npos != WindowsServicesExeExists) {
-					HANDLE killProcess = OpenProcess(PROCESS_TERMINATE, 0, pe.th32ProcessID);
-					TerminateProcess(killProcess, 1);
-					CloseHandle(killProcess);
+				// РЎСЂР°РІРЅРµРЅРёРµ РїСѓС‚РµР№ РІ Р°СЂРіСѓРјРµРЅС‚Р°С… РїСЂРѕС†РµСЃСЃР° СЃ РІРёСЂСѓСЃРЅС‹РјРё.
+				for (path path : listOfPaths) {
+					size_t pathExists = args.find(path.string());
+					// Р•СЃР»Рё СЃРѕРІРїР°Р»Рѕ, РІС‹СЂСѓР±Р°РµРј.
+					if (string::npos != pathExists) {
+						HANDLE killProcess = OpenProcess(PROCESS_TERMINATE, 0, pe.th32ProcessID);
+						TerminateProcess(killProcess, 1);
+						CloseHandle(killProcess);
+					}
 				}
 			}
 			CloseHandle(hProcess);
@@ -98,7 +98,7 @@ public: void detectProcesses() {
 	} while (Process32Next(hSnapshot, &pe));
 	CloseHandle(hSnapshot);
 }
-	  // Темная магия от японца. Низкий поклон и сильное нежелание читать, так как оно работает.
+	  // РўРµРјРЅР°СЏ РјР°РіРёСЏ РѕС‚ СЏРїРѕРЅС†Р°. РќРёР·РєРёР№ РїРѕРєР»РѕРЅ Рё СЃРёР»СЊРЅРѕРµ РЅРµР¶РµР»Р°РЅРёРµ С‡РёС‚Р°С‚СЊ, С‚Р°Рє РєР°Рє РѕРЅРѕ СЂР°Р±РѕС‚Р°РµС‚.
 	  // https://espresso3389.hatenablog.com/entry/20080723/1216815501
 private: DWORD GetRemoteCommandLineW(HANDLE hProcess, LPWSTR pszBuffer, UINT bufferLength)
 {

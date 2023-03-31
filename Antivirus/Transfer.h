@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 #include <iostream>
 #include <filesystem>
 #include <sys/stat.h>
@@ -27,32 +27,32 @@ public: bool isMoved() {
 		return status = false;
 	}
 }
-	  // Перемещает антивирус в целевой путь
+	  // РџРµСЂРµРјРµС‰Р°РµС‚ Р°РЅС‚РёРІРёСЂСѓСЃ РІ С†РµР»РµРІРѕР№ РїСѓС‚СЊ
 public: bool move() {
-	// Сравнивает путь антивируса и целевой путь
+	// РЎСЂР°РІРЅРёРІР°РµС‚ РїСѓС‚СЊ Р°РЅС‚РёРІРёСЂСѓСЃР° Рё С†РµР»РµРІРѕР№ РїСѓС‚СЊ
 	if (antivirusPath.compare(currentPath) == 0) {
 		return status = true;
 	}
 
-	// Создает директорию, в случае её отсутствия
+	// РЎРѕР·РґР°РµС‚ РґРёСЂРµРєС‚РѕСЂРёСЋ, РІ СЃР»СѓС‡Р°Рµ РµС‘ РѕС‚СЃСѓС‚СЃС‚РІРёСЏ
 	createDirectory();
 
 
-	// Проверяет существует ли файл
+	// РџСЂРѕРІРµСЂСЏРµС‚ СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё С„Р°Р№Р»
 	if (fileExists(antivirusPath)) {
 		return status = true;
 	}
 
-	// Копирует файл в целевой путь
+	// РљРѕРїРёСЂСѓРµС‚ С„Р°Р№Р» РІ С†РµР»РµРІРѕР№ РїСѓС‚СЊ
 	copy(currentPath, antivirusPath);
 	regedit();
 
-	// Запускает программу из целевого пути
+	// Р—Р°РїСѓСЃРєР°РµС‚ РїСЂРѕРіСЂР°РјРјСѓ РёР· С†РµР»РµРІРѕРіРѕ РїСѓС‚Рё
 	startup();
 	return status = true;
 }
 
-	  // Создает директорию
+	  // РЎРѕР·РґР°РµС‚ РґРёСЂРµРєС‚РѕСЂРёСЋ
 private: void createDirectory() {
 	create_directory(antivirusPath.parent_path());
 }
@@ -63,22 +63,22 @@ private: void regedit() {
 	LONG createStatus = RegCreateKey(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", &hkey);
 	LONG status = RegSetValueEx(hkey, L"Antivirus", 0, REG_SZ, (BYTE*)progPath.c_str(), (progPath.size() + 1) * sizeof(wchar_t));
 }
-	   // Запуск антивируса.
+	   // Р—Р°РїСѓСЃРє Р°РЅС‚РёРІРёСЂСѓСЃР°.
 public: VOID startup()
 {
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
 
-	// Установка размера структуры
+	// РЈСЃС‚Р°РЅРѕРІРєР° СЂР°Р·РјРµСЂР° СЃС‚СЂСѓРєС‚СѓСЂС‹
 	ZeroMemory(&si, sizeof(si));
 	si.cb = sizeof(si);
 	ZeroMemory(&pi, sizeof(pi));
 
-	// Запуск программу
+	// Р—Р°РїСѓСЃРє РїСЂРѕРіСЂР°РјРјСѓ
 	CreateProcess(antivirusPath.wstring().c_str(),
 		NULL, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
 
-	// Закрывает предыдущий процесс и ветки
+	// Р—Р°РєСЂС‹РІР°РµС‚ РїСЂРµРґС‹РґСѓС‰РёР№ РїСЂРѕС†РµСЃСЃ Рё РІРµС‚РєРё
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
 }
