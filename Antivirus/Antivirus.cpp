@@ -2,19 +2,10 @@
 #include <Windows.h>
 #include <filesystem>
 #include "Transfer.h"
+#include "Catcher.h"
 
 using namespace std;
 using namespace std::filesystem;
-
-
-// smss virus
-static const string smssEXE = "smss.exe";
-
-// vbs virus
-static const string helperVBS = "helper.vbs";
-static const string installerVBS = "installer.vbs";
-static const string movemenoregVBS = "movemenoreg.vbs";
-static const string WindowsServicesEXE = "WindowsServices.exe";
 
 int main(int argc, char* argv[])
 {
@@ -26,7 +17,8 @@ int main(int argc, char* argv[])
 	// Скрытие консоли, если запущен exe'шник
 	HWND console = GetConsoleWindow();
 	DWORD dwProcessId;
-	
+
+
 	GetWindowThreadProcessId(console, &dwProcessId);
 	if (GetCurrentProcessId() == dwProcessId) {
 		ShowWindow(console, SW_HIDE);
@@ -39,15 +31,12 @@ int main(int argc, char* argv[])
 	// Проверка перенесен ли антивирус.
 	Transfer transfer = Transfer(path(argv[0]));
 	if (!transfer.isMoved()) {
-		cout << "join" << endl;
 		transfer.move();
 		return 0;
 	}
-	
 
-	string a;
-	cout << "lol" << endl;
-	cin >> a;
+	// Запуск цикла по проверке на вирусы.
+	Catcher();
 }
 
 

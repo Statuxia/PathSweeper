@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include "Utils.h"
 
 using namespace std;
 using namespace std::filesystem;
@@ -19,7 +20,6 @@ public: Transfer(path path) {
 	this->antivirusPath.append(path.filename().string());
 }
 public: bool isMoved() {
-	cout << antivirusPath << " " << currentPath << endl;
 	if (antivirusPath.compare(currentPath) == 0) {
 		return status = true;
 	}
@@ -37,8 +37,9 @@ public: bool move() {
 	// Создает директорию, в случае её отсутствия
 	createDirectory();
 
+
 	// Проверяет существует ли файл
-	if (fileExists()) {
+	if (fileExists(antivirusPath)) {
 		return status = true;
 	}
 
@@ -55,20 +56,15 @@ public: bool move() {
 private: void createDirectory() {
 	create_directory(antivirusPath.parent_path());
 }
-	   // Возвращает true, если файл существует
-private: bool fileExists() {
-	struct stat buf;
-	return (stat(antivirusPath.string().c_str(), &buf) == 0);
-}
 
 private: void regedit() {
 	std::wstring progPath = antivirusPath.wstring();
 	HKEY hkey = NULL;
-	LONG createStatus = RegCreateKey(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", &hkey);     
+	LONG createStatus = RegCreateKey(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", &hkey);
 	LONG status = RegSetValueEx(hkey, L"Antivirus", 0, REG_SZ, (BYTE*)progPath.c_str(), (progPath.size() + 1) * sizeof(wchar_t));
 }
-
-private: VOID startup()
+	   // Запуск антивируса.
+public: VOID startup()
 {
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
@@ -80,8 +76,8 @@ private: VOID startup()
 
 	// Запуск программу
 	CreateProcess(antivirusPath.wstring().c_str(),
-		NULL, NULL,	NULL, FALSE, 0,NULL, NULL, &si, &pi);
-	
+		NULL, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
+
 	// Закрывает предыдущий процесс и ветки
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
