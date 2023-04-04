@@ -139,6 +139,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Catcher.h" />
+    <ClInclude Include="PreparedPaths.h" />
     <ClInclude Include="Transfer.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
