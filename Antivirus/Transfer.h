@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "Utils.h"
+#include "PreparedPaths.h"
 
 using namespace std;
 using namespace std::filesystem;
@@ -11,10 +12,7 @@ using namespace std::filesystem;
 class Transfer {
 
 private:
-	// from ..\\AppData\\Temp to {Disk}:\\Antivirus
-	path antivirusPath = temp_directory_path().parent_path().parent_path()
-		.parent_path().parent_path().parent_path().parent_path().append("antivirus");
-
+	path antivirusPath = PreparedPaths::getDisk().append("antivirus");
 	path currentPath;
 	bool status;
 
