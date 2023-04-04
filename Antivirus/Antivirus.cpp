@@ -9,11 +9,6 @@ using namespace std::filesystem;
 
 int main(int argc, char* argv[])
 {
-	// Запрет на запуск не на windows
-#if !defined(_WIN32) || !defined(_WIN64)
-	return 0;
-#endif
-
 	// Скрытие консоли, если запущен exe'шник
 	HWND console = GetConsoleWindow();
 	DWORD dwProcessId;
